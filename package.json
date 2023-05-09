@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@bbachain/web3.js": "^1.1.0",
-    "@heroicons/react": "^1.0.5",
+    "@heroicons/react": "^2.0.17",
     "@metaplex/js": "^4.12.0",
     "@noble/ed25519": "^1.7.1",
     "@sentry/react": "^7.51.0",
