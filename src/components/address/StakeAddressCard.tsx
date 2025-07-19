@@ -5,9 +5,10 @@ import {
   Typography,
   Table,
   TableBody,
+  TableRow,
   TableCell,
   TableContainer,
-  TableRow,
+  Alert,
   Button,
   Box,
 } from "@mui/material";
@@ -67,9 +68,9 @@ function LockupCard({ stakeAccount }: { stakeAccount: StakeAccountInfo }) {
   if (Date.now() < unixTimestamp) {
     const prettyTimestamp = displayTimestampUtc(unixTimestamp);
     return (
-      <div className="alert alert-warning text-center">
+      <Alert severity="warning" sx={{ textAlign: "center" }}>
         <strong>Account is locked!</strong> Lockup expires on {prettyTimestamp}
-      </div>
+      </Alert>
     );
   } else {
     return null;
@@ -205,9 +206,11 @@ function DelegationCard({
   }
   const { stake } = stakeAccount;
   return (
-    <div className="card bg-[#011909] shadow-xl mb-4">
-      <div className="card-body">
-        <h2 className="card-title">Stake Delegation</h2>
+    <Card sx={{ mb: 2 }}>
+      <CardContent>
+        <Typography variant="h6" component="h3" sx={{ mb: 2 }}>
+          Stake Delegation
+        </Typography>
         <div className="overflow-x-auto">
           <table className="table w-full">
             <tbody>
@@ -279,53 +282,50 @@ function DelegationCard({
             </tbody>
           </table>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 
 function AuthoritiesCard({ meta }: { meta: StakeMeta }) {
   const hasLockup = meta.lockup.unixTimestamp > 0;
   return (
-    <>
-      <div className="card bg-[#011909] shadow-xl mb-4">
-        <div className="card-body">
-          <h2 className="card-title">Authorities</h2>
+    <Card sx={{ mb: 2 }}>
+      <CardContent>
+        <Typography variant="h6" component="h3" sx={{ mb: 2 }}>
+          Authorities
+        </Typography>
 
-          <div className="overflow-x-auto">
-            <table className="table w-full">
-              <tbody>
+        <div className="overflow-x-auto">
+          <table className="table w-full">
+            <tbody>
+              <tr>
+                <td>Stake Authority Address</td>
+                <td className="text-lg-end">
+                  <AddressComponent pubkey={meta.authorized.staker} link />
+                </td>
+              </tr>
+
+              <tr>
+                <td>Withdraw Authority Address</td>
+                <td className="text-lg-end">
+                  <AddressComponent pubkey={meta.authorized.withdrawer} link />
+                </td>
+              </tr>
+
+              {hasLockup && (
                 <tr>
-                  <td>Stake Authority Address</td>
+                  <td>Lockup Authority Address</td>
                   <td className="text-lg-end">
-                    <AddressComponent pubkey={meta.authorized.staker} link />
+                    <AddressComponent pubkey={meta.lockup.custodian} link />
                   </td>
                 </tr>
-
-                <tr>
-                  <td>Withdraw Authority Address</td>
-                  <td className="text-lg-end">
-                    <AddressComponent
-                      pubkey={meta.authorized.withdrawer}
-                      link
-                    />
-                  </td>
-                </tr>
-
-                {hasLockup && (
-                  <tr>
-                    <td>Lockup Authority Address</td>
-                    <td className="text-lg-end">
-                      <AddressComponent pubkey={meta.lockup.custodian} link />
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+              )}
+            </tbody>
+          </table>
         </div>
-      </div>
-    </>
+      </CardContent>
+    </Card>
   );
 }
 
