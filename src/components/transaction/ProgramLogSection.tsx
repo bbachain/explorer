@@ -1,4 +1,5 @@
 import React from "react";
+import { Button } from "@mui/material";
 
 // Components
 import { SignatureProps } from "views/tx";
@@ -33,15 +34,15 @@ export function ProgramLogSection({ signature }: SignatureProps) {
       <div className="card bg-[#011909] shadow-xl mb-4">
         <div className="card-body">
           <h2 className="card-title">Program Instruction Logs</h2>
-          <button
-            className={`btn btn-sm d-flex ${
-              showRaw ? "btn-black active" : "btn-white"
-            }`}
+          <Button
+            variant={showRaw ? "outlined" : "contained"}
+            color="primary"
+            size="small"
             onClick={() => setShowRaw((r) => !r)}
+            sx={{ mb: 2 }}
           >
-            <span className="fe fe-code me-1"></span>
-            Raw
-          </button>
+            💻 Raw
+          </Button>
           {prettyLogs !== null ? (
             showRaw ? (
               <RawProgramLogs raw={logMessages!} />
@@ -64,16 +65,12 @@ export function ProgramLogSection({ signature }: SignatureProps) {
   );
 }
 
-const RawProgramLogs = ({ raw }: { raw: string[] }) => {
+function RawProgramLogs({ raw }: { raw: string[] }) {
   return (
-    <table className="table w-full">
-      <tbody>
-        <tr>
-          <td>
-            <pre className="text-start">{JSON.stringify(raw, null, 2)}</pre>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <>
+      {raw.map((log, key) => {
+        return <div key={key}>{log}</div>;
+      })}
+    </>
   );
-};
+}

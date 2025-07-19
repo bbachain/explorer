@@ -1,4 +1,5 @@
 import React, { useContext } from "react";
+import { Button } from "@mui/material";
 import {
   TransactionInstruction,
   SignatureResult,
@@ -70,16 +71,16 @@ export function InstructionCard({
           {title}
         </h3>
 
-        <button
+        <Button
           disabled={defaultRaw}
-          className={`btn btn-sm d-flex ${
-            showRaw ? "btn-black active" : "btn-white"
-          }`}
+          variant={showRaw ? "outlined" : "contained"}
+          color="primary"
+          size="small"
           onClick={rawClickHandler}
+          sx={{ mb: 2 }}
         >
-          <span className="fe fe-code me-1"></span>
-          Raw
-        </button>
+          💻 Raw
+        </Button>
 
         <div className="overflow-x-auto">
           <table className="table w-full">
