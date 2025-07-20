@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Card,
@@ -29,6 +29,33 @@ import { FetchStatus } from "hooks/useCache";
 
 export const LatestBlocks: FC = () => {
   const latestBlocks = useLatestBlocks();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Show loading during SSR to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <Card
+        sx={{
+          height: "100%",
+          background:
+            "linear-gradient(135deg, rgba(30, 64, 175, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%)",
+          border: "1px solid rgba(30, 64, 175, 0.2)",
+          borderRadius: 3,
+          overflow: "hidden",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: 200,
+        }}
+      >
+        <CircularProgress sx={{ color: "primary.main" }} />
+      </Card>
+    );
+  }
 
   // Loading state
   if (!latestBlocks) {

@@ -1,25 +1,59 @@
-import React, { useState } from "react";
+import React, { FC, useState } from "react";
 import Link from "next/link";
 import {
-  AppBar,
+  AppBar as MuiAppBar,
   Toolbar,
+  Typography,
+  Button,
   Box,
   IconButton,
   Menu,
   MenuItem,
   useMediaQuery,
   useTheme,
-  Chip,
-  Typography,
-  Button,
 } from "@mui/material";
+
 // Components
 import { Logo } from "./common/Logo";
-import NavElement from "./nav-element";
 import NetworkSwitcher from "./NetworkSwitcher";
 
 // Hooks
 import useQueryContext from "hooks/useQueryContext";
+
+// Custom Hamburger Menu Icon
+const HamburgerIcon = () => (
+  <Box
+    sx={{
+      display: "flex",
+      flexDirection: "column",
+      gap: 0.5,
+      width: 20,
+      height: 16,
+    }}
+  >
+    <Box
+      sx={{
+        height: 2,
+        bgcolor: "currentColor",
+        borderRadius: 1,
+      }}
+    />
+    <Box
+      sx={{
+        height: 2,
+        bgcolor: "currentColor",
+        borderRadius: 1,
+      }}
+    />
+    <Box
+      sx={{
+        height: 2,
+        bgcolor: "currentColor",
+        borderRadius: 1,
+      }}
+    />
+  </Box>
+);
 
 export function AppBarContainer() {
   const { fmtUrlWithCluster } = useQueryContext();
@@ -28,8 +62,6 @@ export function AppBarContainer() {
   const [mobileMenuAnchor, setMobileMenuAnchor] = useState<null | HTMLElement>(
     null
   );
-  const [settingsMenuAnchor, setSettingsMenuAnchor] =
-    useState<null | HTMLElement>(null);
 
   const handleMobileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setMobileMenuAnchor(event.currentTarget);
@@ -39,58 +71,21 @@ export function AppBarContainer() {
     setMobileMenuAnchor(null);
   };
 
-  const handleSettingsMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setSettingsMenuAnchor(event.currentTarget);
-  };
-
-  const handleSettingsMenuClose = () => {
-    setSettingsMenuAnchor(null);
-  };
-
   return (
-    <AppBar
+    <MuiAppBar
       position="static"
       sx={{
-        background: "linear-gradient(135deg, #0F172A 0%, #1E293B 100%)",
-        borderBottom: "1px solid rgba(100, 116, 139, 0.3)",
-        backdropFilter: "blur(12px)",
-        boxShadow:
-          "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-        mb: { xs: 1, md: 2 },
+        background:
+          "linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%)",
+        backdropFilter: "blur(10px)",
+        borderBottom: "1px solid rgba(100, 116, 139, 0.2)",
+        boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
       }}
     >
-      <Toolbar sx={{ minHeight: 80, px: { xs: 2, md: 4 } }}>
-        {/* Logo Section */}
-        <Box sx={{ display: "flex", alignItems: "center", mr: "auto" }}>
-          <Box sx={{ display: { xs: "none", sm: "block" }, ml: { md: 2 } }}>
-            <Link
-              href={fmtUrlWithCluster("/")}
-              style={{ textDecoration: "none", color: "inherit" }}
-            >
-              <Logo width={200} height={100} />
-            </Link>
-          </Box>
-          {/* Mobile Logo */}
-          <Box sx={{ display: { xs: "block", sm: "none" } }}>
-            <Link
-              href={fmtUrlWithCluster("/")}
-              style={{ textDecoration: "none", color: "inherit" }}
-            >
-              <Typography
-                variant="h5"
-                sx={{
-                  fontWeight: 700,
-                  background:
-                    "linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%)",
-                  backgroundClip: "text",
-                  WebkitBackgroundClip: "text",
-                  color: "transparent",
-                }}
-              >
-                BBAChain
-              </Typography>
-            </Link>
-          </Box>
+      <Toolbar sx={{ justifyContent: "space-between", px: { xs: 2, md: 4 } }}>
+        {/* Logo */}
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Logo />
         </Box>
 
         {/* Desktop Navigation */}
@@ -116,6 +111,13 @@ export function AppBarContainer() {
           >
             Transactions
           </Button>
+          <Button
+            component={Link}
+            href={fmtUrlWithCluster("/tokens")}
+            sx={{ color: "white", fontWeight: 500 }}
+          >
+            Tokens
+          </Button>
           {/* <Button
             component={Link}
             href={fmtUrlWithCluster("/validators")}
@@ -138,53 +140,12 @@ export function AppBarContainer() {
         </Box>
 
         {/* Mobile Menu Button */}
-        <Box sx={{ display: { xs: "flex", md: "none" } }}>
-          <IconButton
-            onClick={handleMobileMenuOpen}
-            sx={{
-              color: "text.primary",
-              bgcolor: "rgba(100, 116, 139, 0.1)",
-              border: "1px solid rgba(100, 116, 139, 0.2)",
-              borderRadius: 2,
-              p: 1,
-              "&:hover": {
-                bgcolor: "rgba(100, 116, 139, 0.2)",
-              },
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 0.5,
-                width: 20,
-                height: 16,
-              }}
-            >
-              <Box
-                sx={{
-                  height: 2,
-                  bgcolor: "currentColor",
-                  borderRadius: 1,
-                }}
-              />
-              <Box
-                sx={{
-                  height: 2,
-                  bgcolor: "currentColor",
-                  borderRadius: 1,
-                }}
-              />
-              <Box
-                sx={{
-                  height: 2,
-                  bgcolor: "currentColor",
-                  borderRadius: 1,
-                }}
-              />
-            </Box>
-          </IconButton>
-        </Box>
+        <IconButton
+          sx={{ display: { xs: "block", md: "none" }, color: "white" }}
+          onClick={handleMobileMenuOpen}
+        >
+          <HamburgerIcon />
+        </IconButton>
 
         {/* Mobile Menu */}
         <Menu
@@ -192,12 +153,11 @@ export function AppBarContainer() {
           open={Boolean(mobileMenuAnchor)}
           onClose={handleMobileMenuClose}
           sx={{
-            display: { xs: "block", md: "none" },
-            "& .MuiMenu-paper": {
-              bgcolor: "#1E293B",
+            "& .MuiPaper-root": {
+              backgroundColor: "rgba(15, 23, 42, 0.95)",
+              backdropFilter: "blur(10px)",
               border: "1px solid rgba(100, 116, 139, 0.2)",
               borderRadius: 2,
-              mt: 1,
               minWidth: 200,
             },
           }}
@@ -239,12 +199,12 @@ export function AppBarContainer() {
               },
             }}
           >
-            💸 Transactions
+            🔄 Transactions
           </MenuItem>
-          {/* <MenuItem
+          <MenuItem
             onClick={handleMobileMenuClose}
             component={Link}
-            href={fmtUrlWithCluster("/validators")}
+            href={fmtUrlWithCluster("/tokens")}
             sx={{
               color: "text.primary",
               "&:hover": {
@@ -252,8 +212,8 @@ export function AppBarContainer() {
               },
             }}
           >
-            ✅ Validators
-          </MenuItem> */}
+            🪙 Tokens
+          </MenuItem>
           <MenuItem
             onClick={handleMobileMenuClose}
             component={Link}
@@ -278,7 +238,7 @@ export function AppBarContainer() {
           </Box>
         </Menu>
       </Toolbar>
-    </AppBar>
+    </MuiAppBar>
   );
 }
 

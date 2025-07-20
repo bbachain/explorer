@@ -1,19 +1,36 @@
-import React, { useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
   Typography,
   Table,
   TableBody,
-  TableRow,
   TableCell,
   TableContainer,
   TableHead,
+  TableRow,
   Box,
   Chip,
+  Button,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
-import Moment from "react-moment";
 import { PublicKey } from "@bbachain/web3.js";
+import Moment from "react-moment";
+
+// Components
+import { Signature } from "components/common/Signature";
+import { Balance } from "components/common/Balance";
+
+// Hooks
+import {
+  useFetchAddressHistory,
+  useAddressHistory,
+} from "hooks/useAddressHistory";
+import { FetchStatus } from "hooks/useCache";
+
+// Utils
+import { ClientTimestamp } from "components/common/ClientTimestamp";
 
 // Components
 import {
@@ -23,19 +40,7 @@ import {
 } from "components/HistoryCardComponents";
 import { LoadingCard } from "components/common/LoadingCard";
 import { ErrorCard } from "components/common/ErrorCard";
-import { Signature } from "components/common/Signature";
 import { Slot } from "components/common/Slot";
-
-// Hooks
-import { FetchStatus } from "hooks/useCache";
-import {
-  useAddressHistory,
-  useFetchAddressHistory,
-} from "hooks/useAddressHistory";
-
-// Utils
-import { displayTimestampUtc } from "utils/date";
-import { Balance } from "components/common/Balance";
 
 export function TransactionHistoryCard({ pubkey }: { pubkey: PublicKey }) {
   const address = pubkey.toBase58();
@@ -164,9 +169,15 @@ export function TransactionHistoryCard({ pubkey }: { pubkey: PublicKey }) {
                   color: "text.secondary",
                 }}
               >
-                {blockTime
-                  ? displayTimestampUtc(blockTime * 1000, true)
-                  : "---"}
+                {blockTime ? (
+                  <ClientTimestamp
+                    timestamp={blockTime * 1000}
+                    utc={true}
+                    includeTime={true}
+                  />
+                ) : (
+                  "---"
+                )}
               </TableCell>
             </>
           )}

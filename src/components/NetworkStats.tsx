@@ -1,68 +1,103 @@
-import React, { FC, useEffect } from "react";
+import React, { FC, useEffect, useState } from "react";
 import {
-  Grid,
   Card,
   CardContent,
   Typography,
+  Grid,
   Box,
-  SvgIcon,
-  Paper,
+  CircularProgress,
 } from "@mui/material";
 import Link from "next/link";
 
 // Components
-import { Epoch } from "./common/Epoch";
-import { ErrorCard } from "./common/ErrorCard";
-import { LoadingCard } from "./common/LoadingCard";
+import { LoadingCard } from "components/common/LoadingCard";
+import { ErrorCard } from "components/common/ErrorCard";
 
 // Hooks
 import { ClusterStatus, useCluster } from "hooks/useCluster";
 import { SupplyStatus, useFetchSupply, useSupply } from "hooks/useSupply";
 import {
-  usePerformanceInfo,
   useStatsInfo,
   useStatsProvider,
+  usePerformanceInfo,
 } from "hooks/useStatsInfo";
 import useQueryContext from "hooks/useQueryContext";
 
 // Utils
-import { abbreviatedNumber, slotsToHumanString, toBBA } from "utils";
+import { toBBA, abbreviatedNumber } from "utils";
+import { slotsToHumanString } from "utils";
 
-// Modern Icons Components
+// Icons (SVG components)
 const SupplyIcon = () => (
-  <SvgIcon sx={{ fontSize: "2rem" }}>
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
     <path
-      d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z"
-      fill="currentColor"
+      d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
-  </SvgIcon>
+  </svg>
 );
 
 const BlockIcon = () => (
-  <SvgIcon sx={{ fontSize: "2rem" }}>
-    <path
-      d="M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3M19,5V19H5V5H19Z"
-      fill="currentColor"
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <rect
+      x="3"
+      y="3"
+      width="18"
+      height="18"
+      rx="2"
+      ry="2"
+      stroke="currentColor"
+      strokeWidth="2"
     />
-  </SvgIcon>
+    <rect
+      x="7"
+      y="7"
+      width="10"
+      height="10"
+      rx="1"
+      ry="1"
+      stroke="currentColor"
+      strokeWidth="2"
+    />
+  </svg>
 );
 
 const TransactionIcon = () => (
-  <SvgIcon sx={{ fontSize: "2rem" }}>
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
     <path
-      d="M2,17H20V19H2M1.15,12.65L4,15.5L12.85,6.65C13.05,6.45 13.05,6.1 12.85,5.9L11.9,4.95C11.7,4.75 11.35,4.75 11.15,4.95L4,12.1L2.85,10.95C2.65,10.75 2.3,10.75 2.1,10.95L1.15,11.9C0.95,12.1 0.95,12.45 1.15,12.65Z"
-      fill="currentColor"
+      d="M7 16l4-4-4-4M15 8v8"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
-  </SvgIcon>
+    <rect
+      x="3"
+      y="3"
+      width="18"
+      height="18"
+      rx="2"
+      ry="2"
+      stroke="currentColor"
+      strokeWidth="2"
+    />
+  </svg>
 );
 
 const EpochIcon = () => (
-  <SvgIcon sx={{ fontSize: "2rem" }}>
-    <path
-      d="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"
-      fill="currentColor"
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+    <polyline
+      points="12,6 12,12 16,14"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
-  </SvgIcon>
+  </svg>
 );
 
 export const NetworkStats: FC = () => {
@@ -72,6 +107,7 @@ export const NetworkStats: FC = () => {
   const fetchSupply = useFetchSupply();
   const statsInfo = useStatsInfo();
   const { setActive } = useStatsProvider();
+  const [mounted, setMounted] = useState(false);
 
   const performanceInfo = usePerformanceInfo();
   const transactionCount = performanceInfo.transactionCount;
@@ -96,6 +132,10 @@ export const NetworkStats: FC = () => {
   }
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
     if (status === ClusterStatus.Connected) {
       fetchData();
     }
@@ -105,6 +145,34 @@ export const NetworkStats: FC = () => {
     setActive(true);
     return () => setActive(false);
   }, [setActive, cluster]);
+
+  // Show loading during SSR to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <Box sx={{ mb: 4 }}>
+        <Grid container spacing={3}>
+          {[1, 2, 3, 4].map((i) => (
+            <Grid item xs={12} sm={6} lg={3} key={i}>
+              <Card
+                sx={{
+                  background: "rgba(30, 41, 59, 0.5)",
+                  border: "1px solid rgba(100, 116, 139, 0.2)",
+                  borderRadius: 3,
+                  overflow: "hidden",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  minHeight: 140,
+                }}
+              >
+                <CircularProgress sx={{ color: "primary.main" }} />
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+    );
+  }
 
   if (supply === SupplyStatus.Disconnected) {
     // we'll return here to prevent flicker

@@ -22,12 +22,7 @@ export const Footer: FC = () => {
           {/* Logo and Description */}
           <Grid item xs={12} md={4}>
             <Box sx={{ mb: 3 }}>
-              <Link
-                href={fmtUrlWithCluster("/")}
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                <Logo width={180} height={80} />
-              </Link>
+              <Logo width={180} height={80} href={fmtUrlWithCluster("/")} />
             </Box>
             <Typography
               variant="body2"

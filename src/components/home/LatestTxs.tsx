@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Card,
@@ -11,7 +11,6 @@ import {
   TableHead,
   TableRow,
   Box,
-  Chip,
   Link as MuiLink,
   CircularProgress,
   Alert,
@@ -21,18 +20,43 @@ import {
 import { Slot } from "../common/Slot";
 import { Signature } from "../common/Signature";
 import { Status } from "../common/Status";
-import { Signer } from "../common/Signer";
-import { Confirmations } from "../common/Confirmations";
 
 // Hooks
 import { useLatestTransactions } from "hooks/useLatestTransactions";
 import { FetchStatus } from "hooks/useCache";
 
 // Utils
-import { displayTimestampUtc } from "utils/date";
+import { ClientTimestamp } from "components/common/ClientTimestamp";
 
 export const LatestTxs: FC = () => {
   const latestTransactions = useLatestTransactions();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Show loading during SSR to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <Card
+        sx={{
+          height: "100%",
+          background:
+            "linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(167, 139, 250, 0.1) 100%)",
+          border: "1px solid rgba(139, 92, 246, 0.2)",
+          borderRadius: 3,
+          overflow: "hidden",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: 200,
+        }}
+      >
+        <CircularProgress sx={{ color: "primary.main" }} />
+      </Card>
+    );
+  }
 
   // Loading state
   if (!latestTransactions) {
@@ -284,11 +308,14 @@ export const LatestTxs: FC = () => {
                           fontSize: "0.75rem",
                         }}
                       >
-                        {transactionData.blockTime
-                          ? displayTimestampUtc(
-                              transactionData.blockTime * 1000
-                            )
-                          : "Pending"}
+                        {transactionData.blockTime ? (
+                          <ClientTimestamp
+                            timestamp={transactionData.blockTime * 1000}
+                            utc={true}
+                          />
+                        ) : (
+                          "Pending"
+                        )}
                       </Typography>
                     </TableCell>
                   </TableRow>
