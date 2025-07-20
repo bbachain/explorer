@@ -199,7 +199,6 @@ export const SearchBar: FC = () => {
     </>
   );
 };
-
 function buildProgramOptions(search: string, cluster: Cluster) {
   const matchedPrograms = Object.entries(PROGRAM_INFO_BY_ID).filter(
     ([address, { name, deployments }]) => {

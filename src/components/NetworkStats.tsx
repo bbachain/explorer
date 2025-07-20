@@ -6,6 +6,7 @@ import {
   Typography,
   Box,
   SvgIcon,
+  Paper,
 } from "@mui/material";
 import Link from "next/link";
 
@@ -27,16 +28,39 @@ import useQueryContext from "hooks/useQueryContext";
 // Utils
 import { abbreviatedNumber, slotsToHumanString, toBBA } from "utils";
 
-// Lightning Icon Component
-const LightningIcon = () => (
+// Modern Icons Components
+const SupplyIcon = () => (
   <SvgIcon sx={{ fontSize: "2rem" }}>
     <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2"
-      d="M13 10V3L4 14h7v7l9-11h-7z"
-      fill="none"
-      stroke="currentColor"
+      d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z"
+      fill="currentColor"
+    />
+  </SvgIcon>
+);
+
+const BlockIcon = () => (
+  <SvgIcon sx={{ fontSize: "2rem" }}>
+    <path
+      d="M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3M19,5V19H5V5H19Z"
+      fill="currentColor"
+    />
+  </SvgIcon>
+);
+
+const TransactionIcon = () => (
+  <SvgIcon sx={{ fontSize: "2rem" }}>
+    <path
+      d="M2,17H20V19H2M1.15,12.65L4,15.5L12.85,6.65C13.05,6.45 13.05,6.1 12.85,5.9L11.9,4.95C11.7,4.75 11.35,4.75 11.15,4.95L4,12.1L2.85,10.95C2.65,10.75 2.3,10.75 2.1,10.95L1.15,11.9C0.95,12.1 0.95,12.45 1.15,12.65Z"
+      fill="currentColor"
+    />
+  </SvgIcon>
+);
+
+const EpochIcon = () => (
+  <SvgIcon sx={{ fontSize: "2rem" }}>
+    <path
+      d="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"
+      fill="currentColor"
     />
   </SvgIcon>
 );
@@ -95,101 +119,197 @@ export const NetworkStats: FC = () => {
 
   const stats = [
     {
-      title: "SUPPLY",
+      title: "TOTAL SUPPLY",
       value: displayDaltons(supply.circulating),
-      icon: <LightningIcon />,
+      subtitle: "BBA Tokens",
+      icon: <SupplyIcon />,
+      gradient:
+        "linear-gradient(135deg, rgba(6, 214, 160, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%)",
+      iconColor: "#06D6A0",
     },
     {
-      title: `BLOCKS (${averageSlotTime}ms)`,
-      value: blockHeight,
+      title: "LATEST BLOCK",
+      value: blockHeight.toLocaleString(),
+      subtitle: `${averageSlotTime}ms avg`,
       link: `/block/${blockHeight}`,
-      icon: <LightningIcon />,
+      icon: <BlockIcon />,
+      gradient:
+        "linear-gradient(135deg, rgba(30, 64, 175, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%)",
+      iconColor: "#3B82F6",
     },
     {
       title: "TRANSACTIONS",
-      value: transactionCount,
-      icon: <LightningIcon />,
+      value: transactionCount.toLocaleString(),
+      subtitle: "Total processed",
+      icon: <TransactionIcon />,
+      gradient:
+        "linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(167, 139, 250, 0.1) 100%)",
+      iconColor: "#8B5CF6",
     },
     {
       title: "CURRENT EPOCH",
-      value: epochInfo.epoch,
+      value: epochInfo.epoch.toLocaleString(),
       subtitle: `${epochProgress} complete`,
-      icon: <LightningIcon />,
+      icon: <EpochIcon />,
+      gradient:
+        "linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(251, 191, 36, 0.1) 100%)",
+      iconColor: "#F59E0B",
     },
   ];
 
   return (
-    <Grid container spacing={2} sx={{ width: "100%", mb: 3 }}>
-      {stats.map((stat, index) => (
-        <Grid item xs={12} sm={6} md={3} key={index}>
-          <Card
-            sx={{
-              height: "100%",
-              background: "rgba(255, 255, 255, 0.05)",
-              backdropFilter: "blur(10px)",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
-            }}
-          >
-            <CardContent sx={{ p: 3, "&:last-child": { pb: 3 } }}>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  justifyContent: "space-between",
-                  mb: 2,
-                }}
-              >
-                <Box sx={{ flex: 1 }}>
-                  <Typography
-                    variant="caption"
+    <Box sx={{ mb: 4 }}>
+      {/* Header Section */}
+      <Box sx={{ mb: 3, textAlign: "center" }}>
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 700,
+            mb: 1,
+            background: "linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%)",
+            backgroundClip: "text",
+            WebkitBackgroundClip: "text",
+            color: "transparent",
+          }}
+        >
+          Network Overview
+        </Typography>
+        <Typography
+          variant="body1"
+          sx={{
+            color: "text.secondary",
+            maxWidth: 600,
+            mx: "auto",
+          }}
+        >
+          Real-time statistics and metrics from the BBAChain network
+        </Typography>
+      </Box>
+
+      {/* Stats Grid */}
+      <Grid container spacing={3}>
+        {stats.map((stat, index) => {
+          const StatComponent = (
+            <Card
+              sx={{
+                height: "100%",
+                background: stat.gradient,
+                border: "1px solid rgba(100, 116, 139, 0.2)",
+                borderRadius: 3,
+                overflow: "hidden",
+                transition: "all 0.3s ease-in-out",
+                cursor: stat.link ? "pointer" : "default",
+                "&:hover": {
+                  transform: "translateY(-4px)",
+                  boxShadow:
+                    "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+                  borderColor: stat.iconColor,
+                },
+              }}
+            >
+              <CardContent sx={{ p: 3, "&:last-child": { pb: 3 } }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    justifyContent: "space-between",
+                    mb: 2,
+                  }}
+                >
+                  <Box sx={{ flex: 1 }}>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: "text.secondary",
+                        fontWeight: 600,
+                        letterSpacing: "0.1em",
+                        textTransform: "uppercase",
+                        fontSize: "0.75rem",
+                      }}
+                    >
+                      {stat.title}
+                    </Typography>
+                  </Box>
+                  <Box
                     sx={{
-                      color: "text.secondary",
-                      fontWeight: 600,
-                      letterSpacing: "0.1em",
-                      textTransform: "uppercase",
+                      color: stat.iconColor,
+                      opacity: 0.8,
+                      transition: "all 0.2s ease-in-out",
                     }}
                   >
-                    {stat.title}
-                  </Typography>
+                    {stat.icon}
+                  </Box>
                 </Box>
-                <Box sx={{ color: "text.secondary", opacity: 0.7 }}>
-                  {stat.icon}
-                </Box>
-              </Box>
 
-              <Typography
-                variant="h4"
-                sx={{
-                  fontWeight: "bold",
-                  color: "text.primary",
-                  lineHeight: 1.2,
-                  mb: stat.subtitle ? 1 : 0,
-                }}
-              >
-                {stat.link ? (
-                  <Link
-                    href={fmtUrlWithCluster(stat.link)}
-                    style={{ textDecoration: "none", color: "inherit" }}
-                  >
-                    {stat.value}
-                  </Link>
-                ) : (
-                  stat.value
-                )}
-              </Typography>
-
-              {stat.subtitle && (
                 <Typography
-                  variant="body2"
-                  sx={{ color: "text.secondary", mt: 1 }}
+                  variant="h3"
+                  sx={{
+                    fontWeight: "bold",
+                    color: "text.primary",
+                    lineHeight: 1.2,
+                    mb: stat.subtitle ? 1 : 0,
+                    fontSize: { xs: "1.5rem", md: "2rem" },
+                  }}
                 >
-                  {stat.subtitle}
+                  {stat.value}
                 </Typography>
+
+                {stat.subtitle && (
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "text.secondary",
+                      fontWeight: 500,
+                      opacity: 0.8,
+                    }}
+                  >
+                    {stat.subtitle}
+                  </Typography>
+                )}
+
+                {/* Progress indicator for epoch */}
+                {stat.title === "CURRENT EPOCH" && (
+                  <Box sx={{ mt: 2 }}>
+                    <Box
+                      sx={{
+                        height: 4,
+                        bgcolor: "rgba(100, 116, 139, 0.3)",
+                        borderRadius: 2,
+                        overflow: "hidden",
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          height: "100%",
+                          width: epochProgress,
+                          background: `linear-gradient(90deg, ${stat.iconColor} 0%, ${stat.iconColor}88 100%)`,
+                          borderRadius: 2,
+                          transition: "width 0.3s ease-in-out",
+                        }}
+                      />
+                    </Box>
+                  </Box>
+                )}
+              </CardContent>
+            </Card>
+          );
+
+          return (
+            <Grid item xs={12} sm={6} lg={3} key={index}>
+              {stat.link ? (
+                <Link
+                  href={fmtUrlWithCluster(stat.link)}
+                  style={{ textDecoration: "none" }}
+                >
+                  {StatComponent}
+                </Link>
+              ) : (
+                StatComponent
               )}
-            </CardContent>
-          </Card>
-        </Grid>
-      ))}
-    </Grid>
+            </Grid>
+          );
+        })}
+      </Grid>
+    </Box>
   );
 };
