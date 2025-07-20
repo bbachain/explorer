@@ -92,13 +92,6 @@ export function AppBarContainer() {
         <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1 }}>
           <Button
             component={Link}
-            href={fmtUrlWithCluster("/")}
-            sx={{ color: "white", fontWeight: 500 }}
-          >
-            Home
-          </Button>
-          <Button
-            component={Link}
             href={fmtUrlWithCluster("/blocks")}
             sx={{ color: "white", fontWeight: 500 }}
           >

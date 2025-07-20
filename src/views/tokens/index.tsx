@@ -1,9 +1,7 @@
-import { FC, useState, useEffect } from "react";
-import Link from "next/link";
-import { PublicKey } from "@bbachain/web3.js";
+import React, { FC, useState, useEffect } from "react";
 import {
-  Card,
-  CardContent,
+  Box,
+  Container,
   Typography,
   Table,
   TableBody,
@@ -11,79 +9,94 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Box,
-  Chip,
-  Button,
-  CircularProgress,
-  Alert,
+  Paper,
   Avatar,
   TextField,
   InputAdornment,
+  CircularProgress,
+  Chip,
+  Button,
 } from "@mui/material";
-
-// Components
-import { HeadContainer } from "components/HeadContainer";
-import { Address } from "components/common/Address";
-
-// Hooks
+import Link from "next/link";
 import { useCluster } from "hooks/useCluster";
+import useQueryContext from "hooks/useQueryContext";
+import { useTokens, useTokensDispatch, fetchTokens } from "hooks/useTokens";
+import { FetchStatus } from "hooks/useCache";
 
-// Custom Search Icon
+// Simple Search Icon
 const SearchIcon = () => (
-  <svg
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
     <path
-      d="m21 21-4.35-4.35"
+      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
       stroke="currentColor"
       strokeWidth="2"
+      fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
   </svg>
 );
 
-// Mock data for demonstration - replace with actual token fetching logic
-const MOCK_TOKENS = [
-  {
-    mint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    name: "USD Coin",
-    symbol: "USDC",
-    decimals: 6,
-    logo: "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png",
-    holders: 4907694,
-    marketCap: 8704588375.9,
-  },
-  {
-    mint: "So11111111111111111111111111111111111111112",
-    name: "Wrapped SOL",
-    symbol: "SOL",
-    decimals: 9,
-    logo: "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png",
-    holders: 925578,
-    marketCap: 3815538925.08,
-  },
-  {
-    mint: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
-    name: "Tether",
-    symbol: "USDT",
-    decimals: 6,
-    logo: "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB/logo.png",
-    holders: 2189695,
-    marketCap: 2389927585.19,
-  },
-];
+// Simple Refresh Icon
+const RefreshIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    <path
+      d="M4 4v6h6M20 20v-6h-6M4 20l5-5 5 5M20 4l-5 5-5-5"
+      stroke="currentColor"
+      strokeWidth="2"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
 export const TokensView: FC = () => {
-  const [tokens, setTokens] = useState(MOCK_TOKENS);
-  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const { cluster } = useCluster();
+  const [mounted, setMounted] = useState(false);
+  const { cluster, url } = useCluster();
+  const { fmtUrlWithCluster } = useQueryContext();
+  const tokensData = useTokens();
+  const tokensDispatch = useTokensDispatch();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const handleRefresh = () => {
+    if (url && cluster !== undefined) {
+      fetchTokens(tokensDispatch, url, cluster, 20);
+    }
+  };
+
+  // Show loading placeholder during SSR
+  if (!mounted) {
+    return (
+      <Box
+        sx={{
+          minHeight: "100vh",
+          background: `
+            linear-gradient(135deg, 
+              rgba(15, 23, 42, 0.95) 0%,
+              rgba(30, 41, 59, 0.9) 25%,
+              rgba(51, 65, 85, 0.8) 50%,
+              rgba(30, 58, 138, 0.7) 75%,
+              rgba(79, 70, 229, 0.6) 100%
+            )
+          `,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  const loading = tokensData?.status === FetchStatus.Fetching;
+  const tokens = tokensData?.data?.tokens || [];
+  const hasError = tokensData?.status === FetchStatus.FetchFailed;
 
   const filteredTokens = tokens.filter(
     (token) =>
@@ -124,74 +137,61 @@ export const TokensView: FC = () => {
         },
       }}
     >
-      <Box
-        sx={{
-          position: "relative",
-          zIndex: 1,
-          px: 4,
-          py: 3,
-        }}
-      >
-        <HeadContainer />
-
-        <Box sx={{ maxWidth: "1200px", mx: "auto", mt: 4 }}>
-          <Card
-            sx={{
-              background:
-                "linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(251, 191, 36, 0.1) 100%)",
-              border: "1px solid rgba(245, 158, 11, 0.2)",
-              borderRadius: 3,
-              overflow: "hidden",
-            }}
-          >
-            <CardContent sx={{ p: 0 }}>
-              {/* Header */}
-              <Box
-                sx={{
-                  background: "rgba(30, 41, 59, 0.5)",
-                  p: 3,
-                  borderBottom: "1px solid rgba(100, 116, 139, 0.2)",
-                }}
-              >
-                <Box
-                  sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}
-                >
-                  <Box
-                    sx={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: "50%",
-                      bgcolor: "#F59E0B",
-                      animation: "pulse 2s infinite",
-                      "@keyframes pulse": {
-                        "0%, 100%": { opacity: 1 },
-                        "50%": { opacity: 0.5 },
-                      },
-                    }}
-                  />
-                  <Typography
-                    variant="h4"
-                    sx={{
-                      fontWeight: 600,
-                      color: "text.primary",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                    }}
-                  >
-                    🪙 Tokens
-                  </Typography>
-                </Box>
+      {mounted && (
+        <Box sx={{ position: "relative", zIndex: 1 }}>
+          <Container maxWidth="lg" sx={{ py: 4 }}>
+            <Box sx={{ mb: 4 }}>
+              <Box sx={{ textAlign: "center", mb: 6 }}>
                 <Typography
-                  variant="body1"
+                  variant="h3"
+                  component="h1"
                   sx={{
-                    color: "text.secondary",
-                    opacity: 0.8,
-                    mb: 3,
+                    background:
+                      "linear-gradient(135deg, #F59E0B 0%, #D97706 100%)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                    fontWeight: 700,
+                    mb: 2,
+                    textShadow: "0 4px 12px rgba(245, 158, 11, 0.3)",
                   }}
                 >
-                  All SPL tokens on the BBAChain blockchain
+                  Tokens
                 </Typography>
+
+                <Box
+                  sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}
+                >
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      color: "text.secondary",
+                      opacity: 0.8,
+                      flex: 1,
+                    }}
+                  >
+                    {tokens.length > 0
+                      ? `Found ${tokens.length} SPL tokens on the BBAChain blockchain`
+                      : "All SPL tokens on the BBAChain blockchain"}
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<RefreshIcon />}
+                    onClick={handleRefresh}
+                    disabled={loading}
+                    sx={{
+                      color: "primary.main",
+                      borderColor: "primary.main",
+                      "&:hover": {
+                        borderColor: "primary.light",
+                        backgroundColor: "rgba(245, 158, 11, 0.1)",
+                      },
+                    }}
+                  >
+                    Refresh
+                  </Button>
+                </Box>
 
                 {/* Search */}
                 <TextField
@@ -226,230 +226,189 @@ export const TokensView: FC = () => {
                 />
               </Box>
 
+              {/* Error State */}
+              {hasError && (
+                <Box
+                  sx={{
+                    textAlign: "center",
+                    py: 8,
+                  }}
+                >
+                  <Typography variant="h6" sx={{ color: "error.main", mb: 2 }}>
+                    Failed to load tokens
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "text.secondary", mb: 3 }}
+                  >
+                    Unable to fetch token data from the blockchain. Please try
+                    again.
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    onClick={handleRefresh}
+                    startIcon={<RefreshIcon />}
+                    sx={{
+                      color: "primary.main",
+                      borderColor: "primary.main",
+                    }}
+                  >
+                    Retry
+                  </Button>
+                </Box>
+              )}
+
               {/* Loading State */}
               {loading && (
                 <Box
                   sx={{
                     display: "flex",
+                    flexDirection: "column",
                     alignItems: "center",
                     justifyContent: "center",
                     minHeight: 300,
                   }}
                 >
-                  <CircularProgress sx={{ color: "primary.main" }} />
+                  <CircularProgress sx={{ color: "primary.main", mb: 2 }} />
+                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                    Fetching tokens from blockchain...
+                  </Typography>
                 </Box>
               )}
 
               {/* Tokens Table */}
-              {!loading && (
+              {!loading && !hasError && tokens.length > 0 && (
                 <>
                   <TableContainer>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell
-                            sx={{
-                              color: "text.primary",
-                              fontWeight: 600,
-                              fontSize: "0.75rem",
-                              textTransform: "uppercase",
-                              letterSpacing: "0.05em",
-                              borderBottom:
-                                "1px solid rgba(100, 116, 139, 0.2)",
-                            }}
-                          >
-                            #
-                          </TableCell>
-                          <TableCell
-                            sx={{
-                              color: "text.primary",
-                              fontWeight: 600,
-                              fontSize: "0.75rem",
-                              textTransform: "uppercase",
-                              letterSpacing: "0.05em",
-                              borderBottom:
-                                "1px solid rgba(100, 116, 139, 0.2)",
-                            }}
-                          >
-                            Token
-                          </TableCell>
-                          <TableCell
-                            sx={{
-                              color: "text.primary",
-                              fontWeight: 600,
-                              fontSize: "0.75rem",
-                              textTransform: "uppercase",
-                              letterSpacing: "0.05em",
-                              borderBottom:
-                                "1px solid rgba(100, 116, 139, 0.2)",
-                            }}
-                          >
-                            Mint Address
-                          </TableCell>
-                          <TableCell
-                            sx={{
-                              color: "text.primary",
-                              fontWeight: 600,
-                              fontSize: "0.75rem",
-                              textTransform: "uppercase",
-                              letterSpacing: "0.05em",
-                              borderBottom:
-                                "1px solid rgba(100, 116, 139, 0.2)",
-                            }}
-                          >
-                            Holders
-                          </TableCell>
-                          <TableCell
-                            sx={{
-                              color: "text.primary",
-                              fontWeight: 600,
-                              fontSize: "0.75rem",
-                              textTransform: "uppercase",
-                              letterSpacing: "0.05em",
-                              borderBottom:
-                                "1px solid rgba(100, 116, 139, 0.2)",
-                            }}
-                          >
-                            Market Cap
-                          </TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {filteredTokens.map((token, index) => (
-                          <TableRow
-                            key={`${token.mint}-${index}`}
-                            component={Link}
-                            href={`/token/${token.mint}`}
-                            sx={{
-                              cursor: "pointer",
-                              textDecoration: "none",
-                              "&:hover": {
-                                backgroundColor: "rgba(100, 116, 139, 0.1)",
-                              },
-                              "&:last-child td": {
-                                borderBottom: "none",
-                              },
-                            }}
-                          >
+                    <Paper
+                      sx={{
+                        background: "rgba(30, 41, 59, 0.5)",
+                        backdropFilter: "blur(20px)",
+                        borderRadius: 2,
+                        border: "1px solid rgba(100, 116, 139, 0.2)",
+                      }}
+                    >
+                      <Table>
+                        <TableHead>
+                          <TableRow>
                             <TableCell
-                              sx={{
-                                borderBottom:
-                                  "1px solid rgba(100, 116, 139, 0.1)",
-                                py: 2,
-                              }}
+                              sx={{ color: "text.primary", fontWeight: 600 }}
                             >
-                              <Chip
-                                label={`#${index + 1}`}
-                                size="small"
-                                sx={{
-                                  bgcolor:
-                                    index === 0
-                                      ? "rgba(251, 191, 36, 0.2)"
-                                      : index === 1
-                                      ? "rgba(156, 163, 175, 0.2)"
-                                      : index === 2
-                                      ? "rgba(251, 146, 60, 0.2)"
-                                      : "rgba(100, 116, 139, 0.2)",
-                                  color:
-                                    index === 0
-                                      ? "#FBB928"
-                                      : index === 1
-                                      ? "#9CA3AF"
-                                      : index === 2
-                                      ? "#FB923C"
-                                      : "#64748B",
-                                  fontWeight: 600,
-                                }}
-                              />
+                              #
                             </TableCell>
                             <TableCell
-                              sx={{
-                                borderBottom:
-                                  "1px solid rgba(100, 116, 139, 0.1)",
-                                py: 2,
-                              }}
+                              sx={{ color: "text.primary", fontWeight: 600 }}
                             >
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: 2,
-                                }}
-                              >
-                                <Avatar
-                                  src={token.logo}
-                                  alt={token.symbol}
-                                  sx={{ width: 32, height: 32 }}
-                                >
-                                  {token.symbol[0]}
-                                </Avatar>
-                                <Box>
-                                  <Typography
-                                    variant="body1"
-                                    sx={{ fontWeight: 600 }}
-                                  >
-                                    {token.name}
-                                  </Typography>
-                                  <Typography
-                                    variant="body2"
-                                    sx={{ color: "text.secondary" }}
-                                  >
-                                    {token.symbol}
-                                  </Typography>
-                                </Box>
-                              </Box>
+                              Token
                             </TableCell>
                             <TableCell
-                              sx={{
-                                borderBottom:
-                                  "1px solid rgba(100, 116, 139, 0.1)",
-                                py: 2,
-                              }}
+                              sx={{ color: "text.primary", fontWeight: 600 }}
                             >
-                              <Address
-                                pubkey={new PublicKey(token.mint)}
-                                link
-                              />
+                              Symbol
                             </TableCell>
                             <TableCell
-                              sx={{
-                                borderBottom:
-                                  "1px solid rgba(100, 116, 139, 0.1)",
-                                py: 2,
-                              }}
+                              sx={{ color: "text.primary", fontWeight: 600 }}
                             >
-                              <Typography
-                                variant="body2"
-                                sx={{ fontWeight: 500 }}
-                              >
-                                {token.holders.toLocaleString()}
-                              </Typography>
+                              Supply
                             </TableCell>
                             <TableCell
-                              sx={{
-                                borderBottom:
-                                  "1px solid rgba(100, 116, 139, 0.1)",
-                                py: 2,
-                              }}
+                              sx={{ color: "text.primary", fontWeight: 600 }}
                             >
-                              <Typography
-                                variant="body2"
-                                sx={{ fontWeight: 500 }}
-                              >
-                                $
-                                {token.marketCap.toLocaleString(undefined, {
-                                  maximumFractionDigits: 2,
-                                })}
-                              </Typography>
+                              Decimals
                             </TableCell>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                        </TableHead>
+                        <TableBody>
+                          {filteredTokens.map((token, index) => (
+                            <TableRow
+                              key={`${token.mint}-${index}`}
+                              sx={{
+                                "&:hover": {
+                                  backgroundColor: "rgba(245, 158, 11, 0.1)",
+                                },
+                                borderBottom:
+                                  "1px solid rgba(100, 116, 139, 0.2)",
+                              }}
+                            >
+                              <TableCell sx={{ color: "text.secondary" }}>
+                                {index + 1}
+                              </TableCell>
+                              <TableCell>
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 2,
+                                  }}
+                                >
+                                  <Avatar
+                                    src={token.logo}
+                                    sx={{
+                                      width: 32,
+                                      height: 32,
+                                      backgroundColor: "primary.main",
+                                    }}
+                                  >
+                                    {token.symbol?.[0] || "?"}
+                                  </Avatar>
+                                  <Box>
+                                    <Link
+                                      href={fmtUrlWithCluster(
+                                        `/token/${token.mint}`
+                                      )}
+                                    >
+                                      <Typography
+                                        variant="body2"
+                                        sx={{
+                                          color: "primary.main",
+                                          textDecoration: "none",
+                                          fontWeight: 600,
+                                          "&:hover": {
+                                            textDecoration: "underline",
+                                          },
+                                        }}
+                                      >
+                                        {token.name}
+                                      </Typography>
+                                    </Link>
+                                    <Typography
+                                      variant="caption"
+                                      sx={{ color: "text.secondary" }}
+                                    >
+                                      {token.mint.slice(0, 8)}...
+                                      {token.mint.slice(-8)}
+                                    </Typography>
+                                  </Box>
+                                </Box>
+                              </TableCell>
+                              <TableCell>
+                                <Chip
+                                  label={token.symbol}
+                                  size="small"
+                                  sx={{
+                                    backgroundColor: "rgba(245, 158, 11, 0.2)",
+                                    color: "primary.main",
+                                    fontWeight: 600,
+                                  }}
+                                />
+                              </TableCell>
+                              <TableCell sx={{ color: "text.secondary" }}>
+                                {token.supply
+                                  ? parseInt(token.supply).toLocaleString()
+                                  : "0"}
+                              </TableCell>
+                              <TableCell sx={{ color: "text.secondary" }}>
+                                {token.decimals}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </Paper>
                   </TableContainer>
 
                   {filteredTokens.length === 0 && searchTerm && (
-                    <Box sx={{ p: 4, textAlign: "center" }}>
+                    <Box sx={{ textAlign: "center", py: 4 }}>
                       <Typography
                         variant="body1"
                         sx={{ color: "text.secondary" }}
@@ -460,10 +419,44 @@ export const TokensView: FC = () => {
                   )}
                 </>
               )}
-            </CardContent>
-          </Card>
+
+              {/* Empty State */}
+              {!loading && !hasError && tokens.length === 0 && (
+                <Box
+                  sx={{
+                    textAlign: "center",
+                    py: 8,
+                  }}
+                >
+                  <Typography
+                    variant="h6"
+                    sx={{ color: "text.primary", mb: 2 }}
+                  >
+                    No tokens found
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "text.secondary", mb: 3 }}
+                  >
+                    No SPL tokens were found on this cluster.
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    onClick={handleRefresh}
+                    startIcon={<RefreshIcon />}
+                    sx={{
+                      color: "primary.main",
+                      borderColor: "primary.main",
+                    }}
+                  >
+                    Refresh
+                  </Button>
+                </Box>
+              )}
+            </Box>
+          </Container>
         </Box>
-      </Box>
+      )}
     </Box>
   );
 };

@@ -135,6 +135,15 @@
     "@bbachain/buffer-layout-utils" "^0.0.1"
     buffer "^6.0.3"
 
+"@bbachain/spl-token@^0.1.5":
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/@bbachain/spl-token/-/spl-token-0.1.5.tgz#ba7ce5bd4a5daa2da124fb1b6a80d868f2f78b65"
+  integrity sha512-w0HU1JQrf70+7NW9F6LI+GSwcTw2YSyv1qNexF6ZMUSQsKbUrwYojL3oIJbX8ksccPAi9nl4P9UI2SKjm4Xfmg==
+  dependencies:
+    "@bbachain/buffer-layout" "^1.0.0"
+    "@bbachain/buffer-layout-utils" "^1.0.0"
+    buffer "^6.0.3"
+
 "@bbachain/web3.js@^1.0.3", "@bbachain/web3.js@^1.1.0":
   version "1.1.0"
   resolved "https://registry.npmjs.org/@bbachain/web3.js/-/web3.js-1.1.0.tgz"

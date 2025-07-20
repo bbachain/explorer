@@ -53,23 +53,6 @@ export const Footer: FC = () => {
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
               <Link
-                href={fmtUrlWithCluster("/")}
-                style={{ textDecoration: "none" }}
-              >
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: "text.secondary",
-                    "&:hover": {
-                      color: "primary.light",
-                      transition: "color 0.2s ease",
-                    },
-                  }}
-                >
-                  Home
-                </Typography>
-              </Link>
-              <Link
                 href={fmtUrlWithCluster("/blocks")}
                 style={{ textDecoration: "none" }}
               >
